@@ -4,15 +4,18 @@
         "es2021": true
     },
     "extends": [
-        "airbnb-base"
+        "airbnb-base",
+        "airbnb-typescript/base"
     ],
     "parserOptions": {
+        "project": "./tsconfig.json",
         "ecmaVersion": 12,
         "sourceType": "module"
     },
     "rules": {
         "import/prefer-default-export": "off",
         "import/no-extraneous-dependencies": "off",
-        "no-unused-vars": "off"
+        "no-unused-vars": [1, { "args": "after-used" }],
+        "max-len": "off"
     }
 }

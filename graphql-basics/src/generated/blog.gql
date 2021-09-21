@@ -1,0 +1,26 @@
+type Query {
+    greeting(name: String): String!
+    users(range: Range): [User!]!
+    me: User!
+    post: Post!
+}
+
+input Range {
+    min: Int!
+    max: Int!
+}
+
+
+type Post {
+    id: ID!
+    title: String!
+    body: String!
+    published: Boolean!
+}
+
+type User {
+    id: ID!
+    name: String!
+    email: String!
+    age: Int!
+}

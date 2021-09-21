@@ -1,0 +1,12 @@
+overwrite: true
+schema: "src/**/*.gql"
+generates:
+  src/generated/index.ts:
+    plugins:
+      - add:
+          content: '/* eslint-disable */'
+      - add:
+          content: '/* THIS IS A GENERATED FILE, DO NOT EDIT IT! */'
+      - typescript
+      - typescript-resolvers
+      - src/utils/gqlgen/reexport
