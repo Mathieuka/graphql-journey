@@ -3,6 +3,7 @@ type Query {
     users(range: Range): [User!]!
     me: User!
     posts: [Post!]!
+    commentaries: [Commentary!]!
 }
 
 input Range {
@@ -17,6 +18,7 @@ type Post {
     body: String!
     published: Boolean!
     author: User!
+    commentaries: [Commentary!]!
 }
 
 type User {

@@ -1,27 +1,44 @@
 import { ApolloServer } from 'apollo-server';
-import typeDefs, { Post, Resolvers, User } from './schema';
-import { users, posts, commentaries } from './data/dummyData';
+import typeDefs, {
+  Commentary, Post, Resolvers, User,
+} from './schema';
+import {
+  users, posts, commentaries, PostDataType, CommentaryDataType,
+} from './data/dummyData';
 
 const resolvers: Resolvers = {
   Query: {
-    me: () => users[0] as unknown as User,
-    posts: () => posts as unknown as Post[],
-    users: (parent, { range: rangeID }, ctx, info) => {
-      if (!rangeID) return users as unknown as User[];
+    me: () => <unknown>users[0] as User,
+    posts: () => <unknown>posts as Post[],
+    users: (parent, { range: rangeID }) => {
+      if (!rangeID) return <unknown>users as User[];
       const { min, max } = rangeID;
-      return users.filter(({ id }) => Number(id) >= min && Number(id) <= max) as unknown as User[];
+      const result = <unknown>users.filter(({ id }) => Number(id) >= min && Number(id) <= max);
+      return result as User[];
+    },
+    commentaries: () => <unknown>commentaries as Commentary[],
+  },
+  Commentary: {
+    author: (parent) => {
+      const result = <unknown>users.find((user) => user.id === (<unknown>parent as CommentaryDataType).author);
+      return result as User;
     },
   },
   Post: {
-    author: (parent, args, ctx, info) => {
-      const result = users.find((user) => user.id === parent.author as any);
-      return result as unknown as User;
+    author: (parent) => {
+      const result = <unknown>users.find((user) => user.id === (<unknown>parent as PostDataType).author);
+      return result as User;
+    },
+    commentaries: (parent) => {
+      const commentsOfThePost = commentaries
+        .filter((commentary) => (<unknown>parent as PostDataType).commentaries.includes(commentary.id));
+      return <unknown>commentsOfThePost as Commentary[];
     },
   },
   User: {
-    posts: (parent, ctx, info) => {
-      const result = posts.filter((post) => post.author === parent.id);
-      return result as unknown as Post[];
+    posts: (parent) => {
+      const result = <unknown>posts.filter((post) => post.author === parent.id);
+      return result as Post[];
     },
   },
 };

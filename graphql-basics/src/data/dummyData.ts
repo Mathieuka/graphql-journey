@@ -1,4 +1,4 @@
-interface User {
+export interface UserDataType {
   id: string;
   name: string;
   email: string;
@@ -6,7 +6,7 @@ interface User {
   posts: string[];
 }
 
-export const users: Array<User> = [
+export const users: Array<UserDataType> = [
   {
     id: '1',
     name: 'Pierre',
@@ -30,21 +30,23 @@ export const users: Array<User> = [
   },
 ];
 
-interface Post {
+export interface PostDataType {
   id: string;
   title: string;
   body: string;
   published: boolean;
   author: string;
+  commentaries: string[]
 }
 
-export const posts: Array<Post> = [
+export const posts: Array<PostDataType> = [
   {
     id: '1',
     title: 'Tutny toons',
     body: 'Hell yeah body',
     published: true,
     author: '2',
+    commentaries: ['1', '2'],
   },
   {
     id: '2',
@@ -52,6 +54,7 @@ export const posts: Array<Post> = [
     body: 'babydy boo body',
     published: true,
     author: '1',
+    commentaries: ['3'],
   },
   {
     id: '3',
@@ -59,24 +62,29 @@ export const posts: Array<Post> = [
     body: 'Kily gury body',
     published: true,
     author: '1',
+    commentaries: [],
   },
 ];
 
-interface Commentary {
+export interface CommentaryDataType {
   id: string;
   body: string;
+  author: string
 }
-export const commentaries: Array<Commentary> = [
+export const commentaries: Array<CommentaryDataType> = [
   {
     id: '1',
     body: "That's my commentary",
+    author: '3',
   },
   {
     id: '2',
     body: 'Yup very good',
+    author: '3',
   },
   {
     id: '3',
     body: 'We wait and see',
+    author: '1',
   },
 ];
