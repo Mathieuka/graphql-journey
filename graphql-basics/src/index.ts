@@ -1,33 +1,80 @@
 import { ApolloServer } from 'apollo-server';
-import { build, fake } from '@jackfranklin/test-data-bot';
 import typeDefs, { Post, Resolvers, User } from './generated';
 
-const users = Array.from({ length: 10 }).map((_, idx) => build('User', {
-  fields: {
-    id: JSON.stringify(idx),
-    name: fake((f) => f.random.word()),
-    email: fake((f) => f.internet.email()),
-    age: fake((f) => f.random.number({ min: 10, max: 200 })),
+const users: {
+  id: string;
+  name: string;
+  email: string;
+  age: number;
+  posts: string[];
+}[] = [
+  {
+    id: '1',
+    name: 'Pierre',
+    email: 'pierre@gmail.com',
+    age: 32,
+    posts: ['2', '3'],
   },
-})()) as unknown as User[];
+  {
+    id: '2',
+    name: 'Lune',
+    email: 'lune@gmail.com',
+    age: 39,
+    posts: ['1'],
+  },
+  {
+    id: '3',
+    name: 'Tom',
+    email: 'tom@gmail.com',
+    age: 45,
+    posts: [],
+  },
+];
 
-const posts = Array.from({ length: 10 }).map((_, idx) => build('Post', {
-  fields: {
-    id: fake((f) => f.random.uuid()),
-    title: fake((f) => f.random.word()),
-    body: fake((f) => f.random.words()),
-    published: fake((f) => f.random.boolean()),
+const posts = [
+  {
+    id: '1',
+    title: 'Tutny toons',
+    body: 'Hell yeah body',
+    published: true,
+    author: '2',
   },
-})()) as unknown as Post[];
+  {
+    id: '2',
+    title: 'babydy boo',
+    body: 'babydy boo body',
+    published: true,
+    author: '1',
+  },
+  {
+    id: '3',
+    title: 'Kily gury',
+    body: 'Kily gury body',
+    published: true,
+    author: '1',
+  },
+];
 
 const resolvers: Resolvers = {
   Query: {
-    me: () => users[0],
-    post: () => posts[0],
+    me: () => users[0] as unknown as User,
+    posts: () => posts as unknown as Post[],
     users: (parent, { range: rangeID }, ctx, info) => {
-      if (!rangeID) return users;
+      if (!rangeID) return users as unknown as User[];
       const { min, max } = rangeID;
-      return users.filter(({ id }) => Number(id) >= min && Number(id) <= max);
+      return users.filter(({ id }) => Number(id) >= min && Number(id) <= max) as unknown as User[];
+    },
+  },
+  Post: {
+    author: (parent, args, ctx, info) => {
+      const result = users.find((user) => user.id === parent.author as any);
+      return result as unknown as User;
+    },
+  },
+  User: {
+    posts: (parent, ctx, info) => {
+      const result = posts.filter((post) => (parent.posts as any[]).includes(post.id));
+      return result as unknown as Post[];
     },
   },
 };
