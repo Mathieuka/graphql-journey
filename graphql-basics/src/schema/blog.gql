@@ -26,3 +26,10 @@ type User {
     age: Int!
     posts: [Post!]!
 }
+
+
+type Commentary {
+    id: ID
+    body: String!
+    author: User!
+}

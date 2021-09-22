@@ -1,7 +1,7 @@
 overwrite: true
 schema: "src/**/*.gql"
 generates:
-  src/generated/index.ts:
+  src/schema/index.ts:
     plugins:
       - add:
           content: '/* eslint-disable */'
