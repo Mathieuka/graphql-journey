@@ -36,7 +36,7 @@ export interface PostDataType {
   body: string;
   published: boolean;
   author: string;
-  commentaries: string[]
+  comments: string[]
 }
 
 export const posts: Array<PostDataType> = [
@@ -46,7 +46,7 @@ export const posts: Array<PostDataType> = [
     body: 'Hell yeah body',
     published: true,
     author: '2',
-    commentaries: ['1', '2'],
+    comments: ['1', '2'],
   },
   {
     id: '2',
@@ -54,7 +54,7 @@ export const posts: Array<PostDataType> = [
     body: 'babydy boo body',
     published: true,
     author: '1',
-    commentaries: ['3'],
+    comments: ['3'],
   },
   {
     id: '3',
@@ -62,16 +62,16 @@ export const posts: Array<PostDataType> = [
     body: 'Kily gury body',
     published: true,
     author: '1',
-    commentaries: [],
+    comments: [],
   },
 ];
 
-export interface CommentaryDataType {
+export interface CommentsDataType {
   id: string;
   body: string;
   author: string
 }
-export const commentaries: Array<CommentaryDataType> = [
+export const comments: Array<CommentsDataType> = [
   {
     id: '1',
     body: "That's my commentary",

@@ -1,9 +1,9 @@
 import { ApolloServer } from 'apollo-server';
 import typeDefs, {
-  Commentary, Post, Resolvers, User,
+  Comments, Post, Resolvers, User,
 } from './schema';
 import {
-  users, posts, commentaries, PostDataType, CommentaryDataType,
+  users, posts, comments, PostDataType, CommentsDataType,
 } from './data/dummyData';
 
 const resolvers: Resolvers = {
@@ -16,11 +16,11 @@ const resolvers: Resolvers = {
       const result = <unknown>users.filter(({ id }) => Number(id) >= min && Number(id) <= max);
       return result as User[];
     },
-    commentaries: () => <unknown>commentaries as Commentary[],
+    comments: () => <unknown>comments as Comments [],
   },
-  Commentary: {
+  Comments: {
     author: (parent) => {
-      const result = <unknown>users.find((user) => user.id === (<unknown>parent as CommentaryDataType).author);
+      const result = <unknown>users.find((user) => user.id === (<unknown>parent as CommentsDataType).author);
       return result as User;
     },
   },
@@ -29,10 +29,10 @@ const resolvers: Resolvers = {
       const result = <unknown>users.find((user) => user.id === (<unknown>parent as PostDataType).author);
       return result as User;
     },
-    commentaries: (parent) => {
-      const commentsOfThePost = commentaries
-        .filter((commentary) => (<unknown>parent as PostDataType).commentaries.includes(commentary.id));
-      return <unknown>commentsOfThePost as Commentary[];
+    comments: (parent) => {
+      const commentsOfThePost = comments
+        .filter((commentary) => (<unknown>parent as PostDataType).comments.includes(commentary.id));
+      return <unknown>commentsOfThePost as Comments [];
     },
   },
   User: {
