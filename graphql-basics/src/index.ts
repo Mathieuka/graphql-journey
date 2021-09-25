@@ -16,12 +16,17 @@ const resolvers: Resolvers = {
       const result = <unknown>users.filter(({ id }) => Number(id) >= min && Number(id) <= max);
       return result as User[];
     },
-    comments: () => <unknown>comments as Comments [],
+    comments: () => comments as unknown as Comments [],
   },
   Comments: {
     author: (parent) => {
       const result = <unknown>users.find((user) => user.id === (<unknown>parent as CommentsDataType).author);
       return result as User;
+    },
+    post: (parent) => {
+      const result = <unknown>posts.find(({ comments: _comments }) => _comments.includes((<unknown>parent as CommentsDataType).post));
+      console.log('[result] ', result);
+      return result as Post;
     },
   },
   Post: {
@@ -30,15 +35,19 @@ const resolvers: Resolvers = {
       return result as User;
     },
     comments: (parent) => {
-      const commentsOfThePost = comments
-        .filter((commentary) => (<unknown>parent as PostDataType).comments.includes(commentary.id));
-      return <unknown>commentsOfThePost as Comments [];
+      const result = comments
+        .filter((comment) => (<unknown>parent as PostDataType).comments.includes(comment.id));
+      return <unknown>result as Comments [];
     },
   },
   User: {
     posts: (parent) => {
       const result = <unknown>posts.filter((post) => post.author === parent.id);
       return result as Post[];
+    },
+    comment: (parent) => {
+      const result = <unknown>comments.filter(({ author }) => author === parent.id);
+      return result as Comments[];
     },
   },
 };

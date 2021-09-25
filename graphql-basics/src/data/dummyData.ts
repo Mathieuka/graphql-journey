@@ -1,3 +1,5 @@
+// import { Post, User } from '../schema';
+
 export interface UserDataType {
   id: string;
   name: string;
@@ -70,21 +72,25 @@ export interface CommentsDataType {
   id: string;
   body: string;
   author: string
+  post: string
 }
 export const comments: Array<CommentsDataType> = [
   {
     id: '1',
     body: "That's my commentary",
     author: '3',
+    post: '1',
   },
   {
     id: '2',
     body: 'Yup very good',
     author: '3',
+    post: '1',
   },
   {
     id: '3',
     body: 'We wait and see',
     author: '1',
+    post: '3',
   },
 ];
