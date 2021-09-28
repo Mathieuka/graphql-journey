@@ -1,11 +1,10 @@
-// import { Post, User } from '../schema';
-
 export interface UserDataType {
   id: string;
   name: string;
   email: string;
-  age: number;
+  age: number | null;
   posts: string[];
+  comments: string[]
 }
 
 export const users: Array<UserDataType> = [
@@ -15,6 +14,7 @@ export const users: Array<UserDataType> = [
     email: 'pierre@gmail.com',
     age: 32,
     posts: ['2', '3'],
+    comments: ['3'],
   },
   {
     id: '2',
@@ -22,6 +22,7 @@ export const users: Array<UserDataType> = [
     email: 'lune@gmail.com',
     age: 39,
     posts: ['1'],
+    comments: [],
   },
   {
     id: '3',
@@ -29,6 +30,7 @@ export const users: Array<UserDataType> = [
     email: 'tom@gmail.com',
     age: 45,
     posts: [],
+    comments: ['1', '2'],
   },
 ];
 

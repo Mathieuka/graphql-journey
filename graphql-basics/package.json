@@ -14,7 +14,8 @@
   "dependencies": {
     "apollo-server": "^3.3.0",
     "graphql": "^15.5.3",
-    "ts-node": "^10.2.1"
+    "ts-node": "^10.2.1",
+    "uuid": "^8.3.2"
   },
   "devDependencies": {
     "@graphql-codegen/add": "^3.1.0",
@@ -22,6 +23,7 @@
     "@graphql-codegen/introspection": "2.1.0",
     "@graphql-codegen/typescript": "2.2.2",
     "@graphql-codegen/typescript-resolvers": "2.2.1",
+    "@types/uuid": "^8.3.1",
     "@typescript-eslint/eslint-plugin": "^4.31.0",
     "@typescript-eslint/parser": "^4.31.0",
     "eslint": "^7.32.0",

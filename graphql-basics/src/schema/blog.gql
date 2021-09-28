@@ -6,6 +6,11 @@ type Query {
     comments: [Comments !]!
 }
 
+type Mutation {
+    createUser(name: String!, email: String!, age: Int): User!
+    createPost(title: String!, body: String!, author: String!): Post!
+}
+
 input Range {
     min: Int!
     max: Int!
@@ -25,9 +30,9 @@ type User {
     id: ID!
     name: String!
     email: String!
-    age: Int!
+    age: Int
     posts: [Post!]!
-    comment: [Comments!]!
+    comments: [Comments!]!
 }
 
 
