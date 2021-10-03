@@ -1,7 +1,7 @@
 import { ApolloServer } from 'apollo-server';
 import { v4 as uuidv4 } from 'uuid';
 import typeDefs, {
-  Comments, Post, Resolvers, User,
+  Comment, Post, Resolvers, User,
 } from './schema';
 import {
   users, posts, comments, PostDataType, CommentsDataType, UserDataType,
@@ -17,7 +17,7 @@ const resolvers: Resolvers = {
       const result = <unknown>users.filter(({ id }) => Number(id) >= min && Number(id) <= max);
       return result as User[];
     },
-    comments: () => comments as unknown as Comments [],
+    comments: () => comments as unknown as Comment [],
   },
   Mutation: {
     createUser: (parent, args, ctx, info) => {
@@ -39,20 +39,51 @@ const resolvers: Resolvers = {
 
       return user;
     },
-    createPost: (parent, { title, body, author }, ctx, info) => {
+    createPost: (parent, {
+      title, body, published, author,
+    }, ctx, info) => {
+      const userExist = users.some(({ id }) => id === author);
+      if (!userExist) {
+        throw new Error('User not found');
+      }
       const post = {
         id: uuidv4(),
         title,
         body,
         author,
-        published: false,
+        published,
         comments: [],
       };
       posts.push(post);
       return post as unknown as Post;
     },
+    createComment: (parent, { body, post, author }, ctx, info) => {
+      const userExist = users.some(({ id }) => id === author);
+      const postExist = posts.some(({ id, published }) => id === post && published);
+      if (!userExist) throw new Error('User not found');
+      if (!postExist) throw new Error('Post not found');
+
+      const id = uuidv4();
+      const comment: CommentsDataType = {
+        id,
+        body,
+        author,
+        post,
+      };
+
+      // enrich posts
+      posts.forEach((_post) => {
+        if (_post.id === post) {
+          _post.comments.push(id);
+        }
+      });
+      // update comments
+      comments.push(comment);
+
+      return comment as unknown as Comment;
+    },
   },
-  Comments: {
+  Comment: {
     author: (parent) => {
       const result = <unknown>users.find((user) => user.id === (<unknown>parent as CommentsDataType).author);
       return result as User;
@@ -70,7 +101,7 @@ const resolvers: Resolvers = {
     comments: (parent) => {
       const result = comments
         .filter((comment) => (<unknown>parent as PostDataType).comments.includes(comment.id));
-      return result as unknown as Comments[];
+      return result as unknown as Comment[];
     },
   },
   User: {
@@ -80,7 +111,7 @@ const resolvers: Resolvers = {
     },
     comments: (parent) => {
       const result = comments.filter(({ author }) => author === parent.id);
-      return result as unknown as Comments[];
+      return result as unknown as Comment[];
     },
   },
 };

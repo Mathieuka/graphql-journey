@@ -3,12 +3,13 @@ type Query {
     users(range: Range): [User!]!
     me: User!
     posts: [Post!]!
-    comments: [Comments !]!
+    comments: [Comment !]!
 }
 
 type Mutation {
     createUser(name: String!, email: String!, age: Int): User!
-    createPost(title: String!, body: String!, author: String!): Post!
+    createPost(title: String!, body: String!, published: Boolean!, author: String!): Post!
+    createComment(body: String!, author: String!, post: String!): Comment
 }
 
 input Range {
@@ -23,7 +24,7 @@ type Post {
     body: String!
     published: Boolean!
     author: User!
-    comments: [Comments !]!
+    comments: [Comment !]!
 }
 
 type User {
@@ -32,11 +33,11 @@ type User {
     email: String!
     age: Int
     posts: [Post!]!
-    comments: [Comments!]!
+    comments: [Comment!]!
 }
 
 
-type Comments {
+type Comment {
     id: ID
     body: String!
     author: User!
