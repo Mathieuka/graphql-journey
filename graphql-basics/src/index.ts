@@ -4,7 +4,15 @@ import typeDefs, {
   Comment, Post, Resolvers, User,
 } from './schema';
 import {
-  users, posts, comments, PostDataType, CommentsDataType, UserDataType,
+  users,
+  posts,
+  comments,
+  PostDataType,
+  CommentsDataType,
+  UserDataType,
+  removeComment,
+  removePost,
+  removeUser,
 } from './data/dummyData';
 
 const resolvers: Resolvers = {
@@ -20,27 +28,39 @@ const resolvers: Resolvers = {
     comments: () => comments as unknown as Comment [],
   },
   Mutation: {
-    createUser: (parent, args, ctx, info) => {
-      const emailTaken = users.some(({ email }: UserDataType) => email === args.email);
+    createUser: (parent, { user: { email, age, name } }, ctx, info) => {
+      const emailTaken = users.some(({ email: _email }: UserDataType) => _email === email);
       if (emailTaken) {
         throw new Error('Email taken.');
       }
 
-      const user = {
+      const newUser = {
         id: uuidv4(),
-        name: args.name,
-        email: args.email,
-        age: (args?.age && Number(args?.age)) || null,
+        name,
+        email,
+        age: (age && Number(age)) || null,
         posts: [],
         comments: [],
       };
 
-      users.push(user);
+      users.push(newUser);
 
-      return user;
+      return newUser;
+    },
+    deleteUser: async (parent, { id }, ctx, info) => {
+      const user = users.find(({ id: userID }) => id === userID);
+      if (!user) {
+        throw new Error('Use not found');
+      }
+      await removeComment(user.id);
+      await removePost(user.id);
+      await removeUser(user.id);
+      return user as unknown as User;
     },
     createPost: (parent, {
-      title, body, published, author,
+      post: {
+        title, body, published, author,
+      },
     }, ctx, info) => {
       const userExist = users.some(({ id }) => id === author);
       if (!userExist) {
@@ -57,7 +77,7 @@ const resolvers: Resolvers = {
       posts.push(post);
       return post as unknown as Post;
     },
-    createComment: (parent, { body, post, author }, ctx, info) => {
+    createComment: (parent, { comment: { body, post, author } }, ctx, info) => {
       const userExist = users.some(({ id }) => id === author);
       const postExist = posts.some(({ id, published }) => id === post && published);
       if (!userExist) throw new Error('User not found');

@@ -7,16 +7,35 @@ type Query {
 }
 
 type Mutation {
-    createUser(name: String!, email: String!, age: Int): User!
-    createPost(title: String!, body: String!, published: Boolean!, author: String!): Post!
-    createComment(body: String!, author: String!, post: String!): Comment
+    createUser(user: CreateUserInput!): User!
+    deleteUser(id: ID!): User!
+    createPost(post: CreatePostInput!): Post!
+    createComment(comment: CreateCommentInput!): Comment
+}
+
+input CreateCommentInput {
+    body: String!
+    author: String!
+    post: String!
+}
+
+input CreateUserInput {
+    name: String!
+    email: String!
+    age: Int
+}
+
+input CreatePostInput {
+    title: String!
+    body: String!
+    published: Boolean!
+    author: String!
 }
 
 input Range {
     min: Int!
     max: Int!
 }
-
 
 type Post {
     id: ID!
