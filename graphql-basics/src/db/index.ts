@@ -1,5 +1,3 @@
-/* eslint-disable import/no-mutable-exports */
-
 export interface UserDataType {
   id: string;
   name: string;
@@ -9,7 +7,7 @@ export interface UserDataType {
   comments: string[]
 }
 
-let users: Array<UserDataType> = [
+const users: Array<UserDataType> = [
   {
     id: '1',
     name: 'Pierre',
@@ -45,7 +43,7 @@ export interface PostDataType {
   comments: string[]
 }
 
-let posts: Array<PostDataType> = [
+const posts: Array<PostDataType> = [
   {
     id: '1',
     title: 'Tutny toons',
@@ -80,7 +78,7 @@ export interface CommentsDataType {
 }
 
 // eslint-disable-next-line import/no-mutable-exports
-let comments: Array<CommentsDataType> = [
+const comments: Array<CommentsDataType> = [
   {
     id: '1',
     body: "That's my commentary",
@@ -101,37 +99,16 @@ let comments: Array<CommentsDataType> = [
   },
 ];
 
-const removeComment = (id: string) => new Promise((resolve) => {
-  comments = [...comments.filter(({ author }) => author !== id)];
-  setTimeout(() => resolve(console.log('[Comment removed]')), 1000);
-});
-
-const removePost = (id: string) => new Promise((resolve) => {
-  posts = [...posts.filter(({ author }) => author !== id)];
-  setTimeout(() => resolve(console.log('[Post removed]')), 1000);
-});
-
-const removeUser = (id: string) => new Promise((resolve) => {
-  users = [...users.filter((user) => user.id !== id)];
-  setTimeout(() => resolve(console.log('[User removed]')), 1000);
-});
-
 export interface DB {
   users: UserDataType[];
   posts: PostDataType[];
   comments: CommentsDataType[];
-  removeUser: (id: string) => Promise<unknown>;
-  removePost: (id: string) => Promise<unknown>;
-  removeComment: (id: string) => Promise<unknown>
 }
 
 const db: DB = {
   users,
   posts,
   comments,
-  removeUser,
-  removePost,
-  removeComment,
 };
 
 export default db;
