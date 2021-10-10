@@ -1,5 +1,6 @@
 export interface UserDataType {
   id: string;
+  organization: string;
   name: string;
   email: string;
   age: number | null;
@@ -10,6 +11,7 @@ export interface UserDataType {
 const users: Array<UserDataType> = [
   {
     id: '1',
+    organization: 'pierre-org',
     name: 'Pierre',
     email: 'pierre@gmail.com',
     age: 32,
@@ -18,6 +20,7 @@ const users: Array<UserDataType> = [
   },
   {
     id: '2',
+    organization: 'lune-org',
     name: 'Lune',
     email: 'lune@gmail.com',
     age: 39,
@@ -26,6 +29,7 @@ const users: Array<UserDataType> = [
   },
   {
     id: '3',
+    organization: 'tom-org',
     name: 'Tom',
     email: 'tom@gmail.com',
     age: 45,

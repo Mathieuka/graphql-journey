@@ -50,7 +50,7 @@ const user: Resolvers = {
     users: (parent, ctx, { db }) => db.users,
   },
   Mutation: {
-    createUser: (parent, { user: { email, age, name } }, { db }, info) => {
+    createUser: async (parent, { user: { email, age, name } }, { db }, info) => {
       const emailTaken = db.users.some(({ email: _email }: UserDataType) => _email === email);
       if (emailTaken) {
         throw new Error('Email taken.');
@@ -58,13 +58,14 @@ const user: Resolvers = {
 
       const newUser = {
         id: uuidv4(),
+        organization: `${name}-org`,
         name,
         email,
         age: (age && Number(age)) || null,
         posts: [],
         comments: [],
       };
-      pubsub.publish('USER_CREATED', { userCreated: newUser });
+      await pubsub.publish('USER_CREATED', { userCreated: newUser });
       db.users.push(newUser);
 
       return newUser;

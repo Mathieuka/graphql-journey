@@ -1,4 +1,4 @@
-import { PubSub } from 'graphql-subscriptions';
+import { PubSub, withFilter } from 'graphql-subscriptions';
 import { Resolvers } from '../schema';
 
 export const pubsub = new PubSub();
@@ -6,7 +6,10 @@ export const pubsub = new PubSub();
 const subscription: Resolvers = {
   Subscription: {
     userCreated: {
-      subscribe: () => pubsub.asyncIterator(['USER_CREATED']),
+      subscribe: withFilter(
+        () => pubsub.asyncIterator(['USER_CREATED']),
+        (payload, variables) => (payload.userCreated.organization === variables.organization),
+      ),
     },
   },
 };

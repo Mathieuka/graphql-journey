@@ -1,4 +1,3 @@
-// import { ApolloServer } from 'apollo-server';
 import { ApolloServer } from 'apollo-server-express';
 import { execute, subscribe } from 'graphql';
 import { createServer } from 'http';

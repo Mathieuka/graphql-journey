@@ -1,5 +1,5 @@
 type Subscription {
-    userCreated: User!
+    userCreated(organization: String!): User!
 }
 
 type Query {
@@ -58,6 +58,7 @@ type Post {
 
 type User {
     id: ID!
+    organization: String!
     name: String!
     email: String!
     age: Int
