@@ -1,3 +1,5 @@
-import blogResolver from './blog';
+import CommentResolver from './Comment';
+import PostResolver from './Post';
+import UserResolver from './User';
 
-export default [blogResolver].flat();
+export default [CommentResolver, PostResolver, UserResolver].flat();

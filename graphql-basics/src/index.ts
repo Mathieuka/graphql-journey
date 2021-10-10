@@ -1,7 +1,7 @@
 import { ApolloServer } from 'apollo-server';
 import { DocumentNode } from 'graphql';
 import typeDefs, { Resolvers } from './schema';
-import blog from './resolvers/blog';
+import resolvers from './resolvers';
 import db, { DB } from './db';
 
 export interface Context {
@@ -15,7 +15,7 @@ interface ApolloServerConfig {
 }
 const server = new ApolloServer({
   typeDefs,
-  resolvers: [blog],
+  resolvers,
   context: { db },
 } as ApolloServerConfig);
 
