@@ -5,6 +5,7 @@ import {
 import {
   CommentsDataType, DB, PostDataType, UserDataType,
 } from '../db';
+import { pubsub } from './Subscription';
 
 interface Context {
   db: DB
@@ -63,7 +64,7 @@ const user: Resolvers = {
         posts: [],
         comments: [],
       };
-
+      pubsub.publish('USER_CREATED', { userCreated: newUser });
       db.users.push(newUser);
 
       return newUser;

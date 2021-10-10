@@ -1,6 +1,11 @@
-import { ApolloServer } from 'apollo-server';
-import { DocumentNode } from 'graphql';
-import typeDefs, { Resolvers } from './schema';
+// import { ApolloServer } from 'apollo-server';
+import { ApolloServer } from 'apollo-server-express';
+import { execute, subscribe } from 'graphql';
+import { createServer } from 'http';
+import { SubscriptionServer } from 'subscriptions-transport-ws';
+import { makeExecutableSchema } from '@graphql-tools/schema';
+import express from 'express';
+import typeDefs from './schema';
 import resolvers from './resolvers';
 import db, { DB } from './db';
 
@@ -8,17 +13,40 @@ export interface Context {
   db: DB
 }
 
-interface ApolloServerConfig {
-  typeDefs: string | DocumentNode | DocumentNode[] | string[] | undefined;
-  resolvers: Resolvers;
-  context: Context
-}
-const server = new ApolloServer({
-  typeDefs,
-  resolvers,
-  context: { db },
-} as ApolloServerConfig);
+(async function () {
+  const app = express();
+  const httpServer = createServer(app);
+  let server = {} as any;
 
-server.listen().then(({ url }) => {
-  console.log(`Server ready at ${url}`);
-});
+  const schema = makeExecutableSchema({
+    typeDefs,
+    resolvers,
+  });
+
+  const subscriptionServer = SubscriptionServer.create(
+    { schema, execute, subscribe },
+    { server: httpServer, path: server.graphqlPath },
+  );
+
+  server = new ApolloServer({
+    schema,
+    resolvers,
+    context: { db },
+    plugins: [{
+      async serverWillStart() {
+        return {
+          async drainServer() {
+            subscriptionServer.close();
+          },
+        };
+      },
+    }],
+  });
+
+  await server.start();
+  server.applyMiddleware({ app });
+  const PORT = 4000;
+  httpServer.listen(PORT, () => {
+    console.log(`Server is now running on http://localhost:${PORT}/graphql`);
+  });
+}());

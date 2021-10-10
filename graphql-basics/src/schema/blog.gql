@@ -1,3 +1,7 @@
+type Subscription {
+    userCreated: User!
+}
+
 type Query {
     greeting(name: String): String!
     users(range: Range): [User!]!
