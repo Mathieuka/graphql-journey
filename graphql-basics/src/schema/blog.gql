@@ -1,5 +1,6 @@
 type Subscription {
     userCreated(organization: String!): User!
+    count: Int!
 }
 
 type Query {

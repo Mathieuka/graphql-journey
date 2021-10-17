@@ -5,7 +5,6 @@ import {
 import {
   CommentsDataType, DB, PostDataType, UserDataType,
 } from '../db';
-import { pubsub } from './Subscription';
 
 interface Context {
   db: DB
@@ -50,7 +49,7 @@ const user: Resolvers = {
     users: (parent, ctx, { db }) => db.users,
   },
   Mutation: {
-    createUser: async (parent, { user: { email, age, name } }, { db }, info) => {
+    createUser: async (parent, { user: { email, age, name } }, { db, pubsub }, info) => {
       const emailTaken = db.users.some(({ email: _email }: UserDataType) => _email === email);
       if (emailTaken) {
         throw new Error('Email taken.');

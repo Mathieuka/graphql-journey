@@ -4,14 +4,17 @@ import { createServer } from 'http';
 import { SubscriptionServer } from 'subscriptions-transport-ws';
 import { makeExecutableSchema } from '@graphql-tools/schema';
 import express from 'express';
+import { PubSub } from 'graphql-subscriptions';
 import typeDefs from './schema';
 import resolvers from './resolvers';
 import db, { DB } from './db';
 
 export interface Context {
   db: DB
+  pubsub: unknown
 }
 
+const pubsub = new PubSub();
 (async function () {
   const app = express();
   const httpServer = createServer(app);
@@ -23,14 +26,21 @@ export interface Context {
   });
 
   const subscriptionServer = SubscriptionServer.create(
-    { schema, execute, subscribe },
+    {
+      schema,
+      execute,
+      subscribe,
+      onConnect: (connectionParams: unknown, webSocket: unknown, context: unknown) => ({
+        pubsub,
+      }),
+    },
     { server: httpServer, path: server.graphqlPath },
   );
 
   server = new ApolloServer({
     schema,
     resolvers,
-    context: { db },
+    context: async () => ({ db, pubsub } as Context),
     plugins: [{
       async serverWillStart() {
         return {
