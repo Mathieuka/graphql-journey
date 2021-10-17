@@ -18,6 +18,7 @@ const pubsub = new PubSub();
 (async function () {
   const app = express();
   const httpServer = createServer(app);
+  const ctx = { db, pubsub } as Context;
   let server = {} as any;
 
   const schema = makeExecutableSchema({
@@ -30,9 +31,7 @@ const pubsub = new PubSub();
       schema,
       execute,
       subscribe,
-      onConnect: (connectionParams: unknown, webSocket: unknown, context: unknown) => ({
-        pubsub,
-      }),
+      onConnect: (connectionParams: unknown, webSocket: unknown, context: unknown) => (ctx),
     },
     { server: httpServer, path: server.graphqlPath },
   );
@@ -40,7 +39,7 @@ const pubsub = new PubSub();
   server = new ApolloServer({
     schema,
     resolvers,
-    context: async () => ({ db, pubsub } as Context),
+    context: async () => (ctx),
     plugins: [{
       async serverWillStart() {
         return {

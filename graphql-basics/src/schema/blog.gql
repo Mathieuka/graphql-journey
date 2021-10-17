@@ -1,6 +1,7 @@
 type Subscription {
     userCreated(organization: String!): User!
     count: Int!
+    comment(postId: String!): Comment!
 }
 
 type Query {

@@ -62,7 +62,7 @@ const posts: Array<PostDataType> = [
     body: 'babydy boo body',
     published: true,
     author: '1',
-    comments: ['3'],
+    comments: [],
   },
   {
     id: '3',
@@ -70,7 +70,7 @@ const posts: Array<PostDataType> = [
     body: 'Kily gury body',
     published: true,
     author: '1',
-    comments: [],
+    comments: ['3'],
   },
 ];
 

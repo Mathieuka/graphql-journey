@@ -9,7 +9,7 @@ const comment: Resolvers = {
     comments: (parent, args, { db }) => db.comments,
   },
   Mutation: {
-    createComment: (parent, { comment: { body, post, author } }, { db }, info) => {
+    createComment: async (parent, { comment: { body, post, author } }, { db, pubsub }, info) => {
       const userExist = db.users.some(({ id }: UserDataType) => id === author);
       const postExist = db.posts.some(({ id, published }: PostDataType) => id === post && published);
       if (!userExist) throw new Error('User not found');
@@ -23,16 +23,17 @@ const comment: Resolvers = {
         post,
       };
 
-      // enrich comments list with the new comment
-      db.comments.push(newComment);
+      if (postExist) {
+        // enrich the concerned post with the new comment on database
+        const commentedPost = db.posts.find(({ id: postId }: { id: string }) => postId === post);
+        commentedPost.comments.push(id);
 
-      // enrich the posts with the new comment
-      (db.posts as PostDataType[]).forEach((_post) => {
-        if (_post.id === post) {
-          _post.comments.push(id);
-        }
+        // enrich comments table with the new comment on database
+        db.comments.push(newComment);
+      }
+      pubsub.publish(`comment ${post}`, {
+        comment: newComment,
       });
-
       return newComment as unknown as Comment;
     },
   },
@@ -42,7 +43,7 @@ const comment: Resolvers = {
       return result as User;
     },
     post: (parent, args, { db }) => {
-      const result = db.posts.find(({ comments: _comments }: PostDataType) => _comments.includes((<unknown>parent as CommentsDataType).post));
+      const result = db.posts.find(({ comments }: PostDataType) => comments.includes((<unknown>parent as CommentsDataType).id));
       return result as Post;
     },
   },
