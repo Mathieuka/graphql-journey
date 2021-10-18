@@ -2,6 +2,7 @@ type Subscription {
     userCreated(organization: String!): User!
     count: Int!
     comment(postId: String!): Comment!
+    post: PostSubscriptionPayload!
 }
 
 type Query {
@@ -56,7 +57,12 @@ type Post {
     body: String!
     published: Boolean!
     author: User!
-    comments: [Comment !]!
+    comments: [Comment!]!
+}
+
+type PostSubscriptionPayload {
+    mutation: String!
+    data: Post!
 }
 
 type User {

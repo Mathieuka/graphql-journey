@@ -53,7 +53,7 @@ const post: Resolvers = {
       db.posts.push(newPost);
       return newPost as unknown as Post;
     },
-    deletePost: async (parent, { id }, { db }, info) => {
+    deletePost: async (parent, { id }, { db, pubsub }, info) => {
       const postToBeDeleted = (db as DB).posts.find(({ id: postId }) => postId === id);
       if (!postToBeDeleted) {
         throw new Error('Post not founded');
@@ -61,6 +61,13 @@ const post: Resolvers = {
       await removePostOfTheUser(id, db);
       await removeComment(id, db);
       await removePost(id, db);
+
+      await pubsub.publish('POST', {
+        post: {
+          mutation: 'delete',
+          data: postToBeDeleted as unknown as Post,
+        },
+      });
 
       return postToBeDeleted as unknown as Post;
     },
