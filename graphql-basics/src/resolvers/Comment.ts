@@ -32,7 +32,10 @@ const comment: Resolvers = {
         db.comments.push(newComment);
       }
       pubsub.publish(`comment ${post}`, {
-        comment: newComment,
+        comment: {
+          mutation: 'create',
+          data: newComment,
+        },
       });
       return newComment as unknown as Comment;
     },

@@ -1,7 +1,7 @@
 type Subscription {
-    userCreated(organization: String!): User!
+    userCreated(organization: String!): UserSubscriptionPayload!
     count: Int!
-    comment(postId: String!): Comment!
+    comment(postId: String!): CommentSubscriptionPayload!
     post: PostSubscriptionPayload!
 }
 
@@ -65,6 +65,16 @@ type PostSubscriptionPayload {
     data: Post!
 }
 
+type UserSubscriptionPayload {
+    mutation: String!
+    data: User!
+}
+
+type CommentSubscriptionPayload {
+    mutation: String!
+    data: Comment!
+}
+
 type User {
     id: ID!
     organization: String!
@@ -74,7 +84,6 @@ type User {
     posts: [Post!]!
     comments: [Comment!]!
 }
-
 
 type Comment {
     id: ID

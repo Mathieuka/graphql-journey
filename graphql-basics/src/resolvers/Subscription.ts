@@ -7,7 +7,7 @@ const subscription: Resolvers = {
     userCreated: {
       subscribe: withFilter(
         (parent, args, { pubsub }, info) => pubsub.asyncIterator(['USER_CREATED']),
-        (payload, variables) => (payload.userCreated.organization === variables.organization),
+        (payload, variables) => (payload.userCreated.data.organization === variables.organization),
       ),
     },
     count: {
