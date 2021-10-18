@@ -33,7 +33,7 @@ const comment: Resolvers = {
       }
       pubsub.publish(`comment ${post}`, {
         comment: {
-          mutation: 'create',
+          mutation: 'CREATED',
           data: newComment,
         },
       });

@@ -66,7 +66,7 @@ const user: Resolvers = {
       };
       await pubsub.publish('USER_CREATED', {
         userCreated: {
-          mutation: 'creation',
+          mutation: 'CREATED',
           data: newUser,
         },
       });

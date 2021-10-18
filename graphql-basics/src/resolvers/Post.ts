@@ -64,7 +64,7 @@ const post: Resolvers = {
 
       await pubsub.publish('POST', {
         post: {
-          mutation: 'delete',
+          mutation: 'DELETED',
           data: postToBeDeleted as unknown as Post,
         },
       });
