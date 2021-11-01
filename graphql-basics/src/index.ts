@@ -5,6 +5,7 @@ import { SubscriptionServer } from 'subscriptions-transport-ws';
 import { makeExecutableSchema } from '@graphql-tools/schema';
 import express from 'express';
 import { PubSub } from 'graphql-subscriptions';
+import { PrismaClient } from '@prisma/client';
 import typeDefs from './schema';
 import resolvers from './resolvers';
 import db, { DB } from './db';
@@ -12,13 +13,16 @@ import db, { DB } from './db';
 export interface Context {
   db: DB
   pubsub: unknown
+  prisma: PrismaClient
 }
+
+const prisma = new PrismaClient();
 
 const pubsub = new PubSub();
 (async function () {
   const app = express();
   const httpServer = createServer(app);
-  const ctx = { db, pubsub } as Context;
+  const ctx = { db, pubsub, prisma } as Context;
   let server = {} as any;
 
   const schema = makeExecutableSchema({
