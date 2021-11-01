@@ -1,0 +1,13 @@
+version: "3.7"
+services:
+  postgres:
+    image: postgres:13.3
+    restart: always
+    container_name: graphql-course-postgres
+    environment:
+      POSTGRES_USER: prisma
+      POSTGRES_PASSWORD: prisma
+    volumes:
+      - /Users/mathieu/Documents/perso/graphql-course/graphql-basics/postgres:/var/lib/postgresql/data
+    ports:
+      - 5433:5432
