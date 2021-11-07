@@ -1,7 +1,5 @@
-import { PrismaClient } from '@prisma/client';
 import { data } from './data';
-
-const prisma = new PrismaClient();
+import { prisma } from '../../prisma/client';
 
 async function main() {
   const promises: Promise<unknown>[] = [];

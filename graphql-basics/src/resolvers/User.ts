@@ -6,10 +6,6 @@ import {
   CommentsDataType, DB, PostDataType, UserDataType,
 } from '../db';
 
-interface Context {
-  db: DB
-}
-
 const removeUser = (id: string, db: DB) => new Promise((resolve) => {
   // eslint-disable-next-line no-param-reassign
   db.users = [...db.users.filter((user) => user.id !== id)];
@@ -46,7 +42,7 @@ const updateUser = (id: string, args: UpdateUserInput, db: DB) => new Promise((r
 const user: Resolvers = {
   Query: {
     me: (parent, args, { db }) => db.users[0],
-    users: (parent, ctx, { db }) => db.users,
+    users: async (parent, ctx, { prisma }) => prisma.user.findMany(),
   },
   Mutation: {
     createUser: async (parent, { user: { email, age, name } }, { db, pubsub }, info) => {
@@ -74,7 +70,7 @@ const user: Resolvers = {
 
       return newUser;
     },
-    updateUser: async (parent, { id, args }, { db }: Context, info) => {
+    updateUser: async (parent, { id, args }, { db }: { db: DB }, info) => {
       const userExist = db.users.find(({ id: userId }) => userId === id);
 
       if (!userExist) {

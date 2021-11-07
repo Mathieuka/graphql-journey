@@ -9,14 +9,13 @@ import { PrismaClient } from '@prisma/client';
 import typeDefs from './schema';
 import resolvers from './resolvers';
 import db, { DB } from './db';
+import { prisma } from '../prisma/client';
 
 export interface Context {
   db: DB
   pubsub: unknown
   prisma: PrismaClient
 }
-
-const prisma = new PrismaClient();
 
 const pubsub = new PubSub();
 (async function () {
@@ -35,7 +34,6 @@ const pubsub = new PubSub();
       schema,
       execute,
       subscribe,
-      onConnect: (connectionParams: unknown, webSocket: unknown, context: unknown) => (ctx),
     },
     { server: httpServer, path: server.graphqlPath },
   );
