@@ -42,7 +42,20 @@ const updateUser = (id: string, args: UpdateUserInput, db: DB) => new Promise((r
 const user: Resolvers = {
   Query: {
     me: (parent, args, { db }) => db.users[0],
-    users: async (parent, ctx, { prisma }) => prisma.user.findMany(),
+    users: async (parent, args, { prisma }) => {
+      const usersID1WithHisPosts = await prisma.user.findMany({
+        where: {
+          id: 1,
+        },
+        include: {
+          posts: true,
+        },
+      });
+      console.log('[usersID1WithHisPosts] ', usersID1WithHisPosts);
+      console.log('[posts of the users with id 1] ', usersID1WithHisPosts[0].posts);
+      const users = await prisma.user.findMany();
+      return users;
+    },
   },
   Mutation: {
     createUser: async (parent, { user: { email, age, name } }, { db, pubsub }, info) => {

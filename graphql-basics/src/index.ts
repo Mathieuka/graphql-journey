@@ -41,7 +41,7 @@ const pubsub = new PubSub();
   server = new ApolloServer({
     schema,
     resolvers,
-    context: async () => (ctx),
+    context: async (): Promise<Context> => (ctx),
     plugins: [{
       async serverWillStart() {
         return {
