@@ -1,10 +1,16 @@
 import { v4 as uuidv4 } from 'uuid';
+import { PrismaClient } from '@prisma/client';
+import { PubSubEngine } from 'graphql-subscriptions';
 import {
   Comment, Post, Resolvers, UpdateUserInput, User,
 } from '../schema';
-import {
-  CommentsDataType, DB, PostDataType, UserDataType,
-} from '../db';
+import { DB, UserDataType } from '../db';
+
+interface Context {
+  db: DB
+  pubsub: PubSubEngine
+  prisma: PrismaClient
+}
 
 const removeUser = (id: string, db: DB) => new Promise((resolve) => {
   // eslint-disable-next-line no-param-reassign
@@ -41,16 +47,16 @@ const updateUser = (id: string, args: UpdateUserInput, db: DB) => new Promise((r
 
 const user: Resolvers = {
   Query: {
-    me: async (parent, args, { prisma }) => {
+    me: async (parent, args, { prisma }: Context) => {
       const [me] = await prisma.user.findMany({
         where: {
-          id: 10,
+          id: 1,
         },
       });
       if (!me) {
         throw new Error('no user found');
       }
-      return me;
+      return me as User;
     },
     users: async (parent, args, { prisma }) => {
       const users = await prisma.user.findMany();
@@ -61,31 +67,31 @@ const user: Resolvers = {
     },
   },
   Mutation: {
-    createUser: async (parent, { user: { email, age, name } }, { db, pubsub }, info) => {
-      const emailTaken = db.users.some(({ email: _email }: UserDataType) => _email === email);
-      if (emailTaken) {
-        throw new Error('Email taken.');
-      }
-
-      const newUser = {
-        id: uuidv4(),
-        organization: `${name}-org`,
-        name,
-        email,
-        age: (age && Number(age)) || null,
-        posts: [],
-        comments: [],
-      };
-      await pubsub.publish('USER_CREATED', {
-        userCreated: {
-          mutation: 'CREATED',
-          data: newUser,
-        },
-      });
-      db.users.push(newUser);
-
-      return newUser;
-    },
+    // createUser: async (parent, { user: { email, age, name } }, { db, pubsub, prisma }: Context, info) => {
+    //   const emailTaken = db.users.some(({ email: _email }: UserDataType) => _email === email);
+    //   if (emailTaken) {
+    //     throw new Error('Email taken.');
+    //   }
+    //
+    //   const newUser = {
+    //     id: uuidv4(),
+    //     organization: `${name}-org`,
+    //     name,
+    //     email,
+    //     age: (age && Number(age)) || null,
+    //     posts: [],
+    //     comments: [],
+    //   };
+    //   await pubsub.publish('USER_CREATED', {
+    //     userCreated: {
+    //       mutation: 'CREATED',
+    //       data: newUser,
+    //     },
+    //   });
+    //   db.users.push(newUser);
+    //
+    //   return newUser;
+    // },
     updateUser: async (parent, { id, args }, { db }: { db: DB }, info) => {
       const userExist = db.users.find(({ id: userId }) => userId === id);
 
@@ -114,17 +120,21 @@ const user: Resolvers = {
     },
   },
   User: {
-    posts: async (parent, args, { db, prisma }) => {
+    posts: async (parent, args, { db, prisma }: Context) => {
       const posts = await prisma.post.findMany({
         where: {
           authorId: parent.id,
         },
       });
-      return posts;
+      return posts as unknown as Post[];
     },
-    comments: (parent, args, { db }) => {
-      const result = db.comments.filter(({ author }: CommentsDataType) => author === parent.id);
-      return result as unknown as Comment[];
+    comments: async (parent, args, { db, prisma }: Context) => {
+      const comments = await prisma.comment.findMany({
+        where: {
+          authorId: parent.id,
+        },
+      });
+      return comments as unknown as Comment[];
     },
   },
 };

@@ -11,7 +11,7 @@ import resolvers from './resolvers';
 import db, { DB } from './db';
 import { prisma } from '../prisma/client';
 
-export interface Context {
+interface Context {
   db: DB
   pubsub: unknown
   prisma: PrismaClient
@@ -21,7 +21,7 @@ const pubsub = new PubSub();
 (async function () {
   const app = express();
   const httpServer = createServer(app);
-  const ctx = { db, pubsub, prisma } as Context;
+  const ctx: Context = { db, pubsub, prisma };
   let server = {} as any;
 
   const schema = makeExecutableSchema({

@@ -51,15 +51,6 @@ input Range {
     max: Int!
 }
 
-type Post {
-    id: ID!
-    title: String!
-    body: String!
-    published: Boolean!
-    author: User!
-    comments: [Comment!]!
-}
-
 enum MutationType {
     CREATED
     DELETED
@@ -81,13 +72,22 @@ type CommentSubscriptionPayload {
 }
 
 type User {
-    id: ID!
+    id: Int!
     organization: String!
     name: String!
     email: String!
     age: Int
-    posts: [Post!]!
-    comments: [Comment!]!
+    posts: [Post]!
+    comments: [Comment]!
+}
+
+type Post {
+    id: ID!
+    title: String!
+    body: String!
+    published: Boolean!
+    author: User!
+    comments: [Comment]!
 }
 
 type Comment {
