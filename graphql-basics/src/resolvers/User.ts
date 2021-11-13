@@ -67,31 +67,35 @@ const user: Resolvers = {
     },
   },
   Mutation: {
-    // createUser: async (parent, { user: { email, age, name } }, { db, pubsub, prisma }: Context, info) => {
-    //   const emailTaken = db.users.some(({ email: _email }: UserDataType) => _email === email);
-    //   if (emailTaken) {
-    //     throw new Error('Email taken.');
-    //   }
-    //
-    //   const newUser = {
-    //     id: uuidv4(),
-    //     organization: `${name}-org`,
-    //     name,
-    //     email,
-    //     age: (age && Number(age)) || null,
-    //     posts: [],
-    //     comments: [],
-    //   };
-    //   await pubsub.publish('USER_CREATED', {
-    //     userCreated: {
-    //       mutation: 'CREATED',
-    //       data: newUser,
-    //     },
-    //   });
-    //   db.users.push(newUser);
-    //
-    //   return newUser;
-    // },
+    createUser: async (parent, { user: { email, age, name } }, { db, pubsub, prisma }: Context, info) => {
+      const emailTaken = await prisma.user.findFirst({
+        where: {
+          email,
+        },
+      });
+      if (emailTaken) {
+        throw new Error('Email taken.');
+      }
+
+      const createdUser = await prisma.user.create({
+        data: {
+          email,
+          name,
+          age,
+          organization: `${name}-org`,
+        },
+      });
+      if (!createdUser) {
+        throw new Error('User not created');
+      }
+      //   await pubsub.publish('USER_CREATED', {
+      //     userCreated: {
+      //       mutation: 'CREATED',
+      //       data: newUser,
+      //     },
+      //   });
+      return createdUser as User;
+    },
     updateUser: async (parent, { id, args }, { db }: { db: DB }, info) => {
       const userExist = db.users.find(({ id: userId }) => userId === id);
 
@@ -120,7 +124,7 @@ const user: Resolvers = {
     },
   },
   User: {
-    posts: async (parent, args, { db, prisma }: Context) => {
+    posts: async (parent, args, { prisma }: Context) => {
       const posts = await prisma.post.findMany({
         where: {
           authorId: parent.id,
@@ -128,7 +132,7 @@ const user: Resolvers = {
       });
       return posts as unknown as Post[];
     },
-    comments: async (parent, args, { db, prisma }: Context) => {
+    comments: async (parent, args, { prisma }: Context) => {
       const comments = await prisma.comment.findMany({
         where: {
           authorId: parent.id,
