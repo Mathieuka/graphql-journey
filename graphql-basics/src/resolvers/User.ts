@@ -41,19 +41,22 @@ const updateUser = (id: string, args: UpdateUserInput, db: DB) => new Promise((r
 
 const user: Resolvers = {
   Query: {
-    me: (parent, args, { db }) => db.users[0],
-    users: async (parent, args, { prisma }) => {
-      const usersID1WithHisPosts = await prisma.user.findMany({
+    me: async (parent, args, { prisma }) => {
+      const [me] = await prisma.user.findMany({
         where: {
-          id: 1,
-        },
-        include: {
-          posts: true,
+          id: 10,
         },
       });
-      console.log('[usersID1WithHisPosts] ', usersID1WithHisPosts);
-      console.log('[posts of the users with id 1] ', usersID1WithHisPosts[0].posts);
+      if (!me) {
+        throw new Error('no user found');
+      }
+      return me;
+    },
+    users: async (parent, args, { prisma }) => {
       const users = await prisma.user.findMany();
+      if (!users.length) {
+        throw new Error('no user found');
+      }
       return users;
     },
   },
@@ -111,9 +114,13 @@ const user: Resolvers = {
     },
   },
   User: {
-    posts: (parent, args, { db }) => {
-      const result = db.posts.filter(({ author }: PostDataType) => author === parent.id);
-      return result as unknown as Post[];
+    posts: async (parent, args, { db, prisma }) => {
+      const posts = await prisma.post.findMany({
+        where: {
+          authorId: parent.id,
+        },
+      });
+      return posts;
     },
     comments: (parent, args, { db }) => {
       const result = db.comments.filter(({ author }: CommentsDataType) => author === parent.id);
