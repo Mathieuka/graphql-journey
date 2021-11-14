@@ -1,48 +1,15 @@
-import { PrismaClient, Prisma } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 import { PubSubEngine } from 'graphql-subscriptions';
 import {
-  Comment, Post, Resolvers, UpdateUserInput, User,
+  Comment, Post, Resolvers, User,
 } from '../schema';
-import { DB, UserDataType } from '../db';
+import { DB } from '../db';
 
 interface Context {
   db: DB
   pubsub: PubSubEngine
   prisma: PrismaClient
 }
-
-const removeUser = (id: string, db: DB) => new Promise((resolve) => {
-  // eslint-disable-next-line no-param-reassign
-  db.users = [...db.users.filter((user) => user.id !== id)];
-  setTimeout(() => resolve(console.log('[User removed]')), 1000);
-});
-
-const removeComment = (id: string, db: DB) => new Promise((resolve) => {
-  // eslint-disable-next-line no-param-reassign
-  db.comments = [...db.comments.filter(({ author }) => author !== id)];
-  setTimeout(() => resolve(console.log('[Comment removed]')), 1000);
-});
-
-const removePost = (id: string, db: DB) => new Promise((resolve) => {
-  // eslint-disable-next-line no-param-reassign
-  db.posts = [...db.posts.filter(({ author }) => author !== id)];
-  setTimeout(() => resolve(console.log('[Post removed]')), 1000);
-});
-
-const updateUser = (id: string, args: UpdateUserInput, db: DB) => new Promise((resolve) => {
-  // eslint-disable-next-line no-param-reassign
-  db.users = [...db.users.map((user) => {
-    if (user.id === id) {
-      return {
-        ...user,
-        age: args.age || user.age,
-        email: args.email || user.email,
-      };
-    }
-    return user;
-  })];
-  setTimeout(() => resolve(console.log('[User updated]')), 1000);
-});
 
 const user: Resolvers = {
   Query: {
@@ -66,7 +33,7 @@ const user: Resolvers = {
     },
   },
   Mutation: {
-    createUser: async (parent, { user: { email, age, name } }, { db, pubsub, prisma }: Context, info) => {
+    createUser: async (parent, { user: { email, age, name } }, { pubsub, prisma }: Context, info) => {
       const emailTaken = await prisma.user.findFirst({
         where: {
           email,
@@ -95,7 +62,7 @@ const user: Resolvers = {
       //   });
       return createdUser as User;
     },
-    updateUser: async (parent, { id, args }, { db, prisma }: Context, info) => {
+    updateUser: async (parent, { id, args }, { prisma }: Context, info) => {
       const emailTaken = await prisma.user.findFirst({
         where: {
           email: args.email,
@@ -120,15 +87,40 @@ const user: Resolvers = {
         throw new Error('Record to update not found');
       }
     },
-    deleteUser: async (parent, { id }, { db }, info) => {
-      const userToBeRemoved = db.users.find(({ id: userID }: UserDataType) => id === userID);
-      if (!userToBeRemoved) {
-        throw new Error('User not found');
-      }
-      await removeComment(userToBeRemoved.id, db);
-      await removePost(userToBeRemoved.id, db);
-      await removeUser(userToBeRemoved.id, db);
-      return userToBeRemoved;
+    deleteUser: async (parent, { id }, { prisma }: Context, info) => {
+      // get all posts of the user
+      const postsOfTheUser = await prisma.post.findMany({
+        where: {
+          authorId: id,
+        },
+      });
+
+      const idsLinkedToThePostOfTheUser = postsOfTheUser.map(({ id: postId }) => ({ postId }));
+      // remove each `Comment` linked to the user
+      // remove each `Comment` linked to the `Post` of the user
+      const commentariesDeleted = await prisma.comment.deleteMany({
+        where: {
+          OR: [...idsLinkedToThePostOfTheUser, { authorId: id }],
+        },
+      });
+      console.log('[Quantity of commentaries deleted] ', commentariesDeleted);
+
+      // remove all `Post` of the user
+      const postDeleted = await prisma.post.deleteMany({
+        where: {
+          authorId: id,
+        },
+      });
+      console.log('[Quantity of posts deleted] ', postDeleted);
+
+      // remove the user
+      const userDeleted = await prisma.user.delete({
+        where: {
+          id,
+        },
+      });
+      console.log('[User deleted] ', userDeleted);
+      return userDeleted as unknown as User;
     },
   },
   User: {
