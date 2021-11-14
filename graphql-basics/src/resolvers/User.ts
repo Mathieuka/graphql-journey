@@ -1,5 +1,4 @@
-import { v4 as uuidv4 } from 'uuid';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, Prisma } from '@prisma/client';
 import { PubSubEngine } from 'graphql-subscriptions';
 import {
   Comment, Post, Resolvers, UpdateUserInput, User,
@@ -96,21 +95,30 @@ const user: Resolvers = {
       //   });
       return createdUser as User;
     },
-    updateUser: async (parent, { id, args }, { db }: { db: DB }, info) => {
-      const userExist = db.users.find(({ id: userId }) => userId === id);
+    updateUser: async (parent, { id, args }, { db, prisma }: Context, info) => {
+      const emailTaken = await prisma.user.findFirst({
+        where: {
+          email: args.email,
+        },
+      });
+      if (emailTaken) {
+        throw new Error('Email taken.');
+      }
 
-      if (!userExist) {
-        throw new Error('User not found');
+      try {
+        const userUpdated = await prisma.user.update({
+          where: {
+            id,
+          },
+          data: {
+            age: args.age,
+            email: args.email,
+          },
+        });
+        return userUpdated as unknown as User;
+      } catch (error) {
+        throw new Error('Record to update not found');
       }
-      if (args?.email) {
-        const emailTaken = db.users.some(({ email }) => args.email === email);
-        if (emailTaken) {
-          throw new Error('Email already taken');
-        }
-      }
-      await updateUser(id, args, db);
-      const userUpdated = db.users.find(({ id: userId }) => userId === id);
-      return userUpdated as unknown as User;
     },
     deleteUser: async (parent, { id }, { db }, info) => {
       const userToBeRemoved = db.users.find(({ id: userID }: UserDataType) => id === userID);
