@@ -1,10 +1,6 @@
-import { v4 as uuidv4 } from 'uuid';
-import {
-  Comment, Post, Resolvers, User,
-} from '../schema';
-import {
-  CommentsDataType, DB, PostDataType, UserDataType,
-} from '../db';
+import { Post, Resolvers } from '../schema';
+import { DB } from '../db';
+import { Context } from '../context';
 
 const removePostOfTheUser = (id: string, db: DB) => new Promise((resolve) => {
   db.users.forEach(({ posts }) => {
@@ -30,28 +26,36 @@ const removeComment = (id: string, db: DB) => new Promise((resolve) => {
 
 const post: Resolvers = {
   Query: {
-    posts: (parent, args, { db }) => db.posts,
+    posts: async (parent, args, { prisma }: Context) => {
+      const posts = await prisma.post.findMany();
+      return posts;
+    },
   },
   Mutation: {
-    createPost: (parent, {
+    createPost: async (parent, {
       post: {
         title, body, published, author,
       },
-    }, { db }, info) => {
-      const userExist = db.users.some(({ id }: UserDataType) => id === author);
-      if (!userExist) {
+    }, { prisma }: Context, info) => {
+      const authorTemp = await prisma.user.findUnique({
+        where: {
+          id: author,
+        },
+      });
+
+      if (!authorTemp) {
         throw new Error('User not found');
       }
-      const newPost = {
-        id: uuidv4(),
-        title,
-        body,
-        author,
-        published,
-        comments: [],
-      };
-      db.posts.push(newPost);
-      return newPost as unknown as Post;
+      const newPost = await prisma.post.create({
+        data: {
+          authorId: author,
+          title,
+          body,
+          published,
+        },
+      });
+
+      return newPost;
     },
     deletePost: async (parent, { id }, { db, pubsub }, info) => {
       const postToBeDeleted = (db as DB).posts.find(({ id: postId }) => postId === id);
@@ -73,15 +77,15 @@ const post: Resolvers = {
     },
   },
   Post: {
-    author: (parent, args, { db }) => {
-      const result = db.users.find(({ id }: UserDataType) => id === (<unknown>parent as PostDataType).author);
-      return result as User;
-    },
-    comments: (parent, args, { db }) => {
-      const result = (db.comments as CommentsDataType[])
-        .filter((comment) => (<unknown>parent as PostDataType).comments.includes(comment.id));
-      return result as unknown as Comment[];
-    },
+    // author: (parent, args, { db }) => {
+    //   const result = db.users.find(({ id }: UserDataType) => id === (<unknown>parent as PostDataType).author);
+    //   return result as User;
+    // },
+    // comments: (parent, args, { db }) => {
+    //   const result = (db.comments as CommentsDataType[])
+    //     .filter((comment) => (<unknown>parent as PostDataType).comments.includes(comment.id));
+    //   return result as unknown as Comment[];
+    // },
   },
 };
 

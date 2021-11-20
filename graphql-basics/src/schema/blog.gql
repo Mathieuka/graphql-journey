@@ -40,10 +40,10 @@ input CreateUserInput {
 }
 
 input CreatePostInput {
+    author: Int!
     title: String!
     body: String!
     published: Boolean!
-    author: String!
 }
 
 input Range {
@@ -82,12 +82,11 @@ type User {
 }
 
 type Post {
-    id: ID!
+    id: Int!
     title: String!
     body: String!
     published: Boolean!
-    author: User!
-    comments: [Comment]!
+    authorId: Int
 }
 
 type Comment {
