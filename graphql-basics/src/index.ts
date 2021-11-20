@@ -4,24 +4,13 @@ import { createServer } from 'http';
 import { SubscriptionServer } from 'subscriptions-transport-ws';
 import { makeExecutableSchema } from '@graphql-tools/schema';
 import express from 'express';
-import { PubSub } from 'graphql-subscriptions';
-import { PrismaClient } from '@prisma/client';
 import typeDefs from './schema';
 import resolvers from './resolvers';
-import db, { DB } from './db';
-import { prisma } from '../prisma/client';
+import { context, Context } from './context';
 
-interface Context {
-  db: DB
-  pubsub: unknown
-  prisma: PrismaClient
-}
-
-const pubsub = new PubSub();
 (async function () {
   const app = express();
   const httpServer = createServer(app);
-  const ctx: Context = { db, pubsub, prisma };
   let server = {} as any;
 
   const schema = makeExecutableSchema({
@@ -41,7 +30,7 @@ const pubsub = new PubSub();
   server = new ApolloServer({
     schema,
     resolvers,
-    context: async (): Promise<Context> => (ctx),
+    context: async (): Promise<Context> => (context),
     plugins: [{
       async serverWillStart() {
         return {

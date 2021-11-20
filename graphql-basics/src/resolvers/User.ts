@@ -1,15 +1,7 @@
-import { PrismaClient } from '@prisma/client';
-import { PubSubEngine } from 'graphql-subscriptions';
 import {
   Comment, Post, Resolvers, User,
 } from '../schema';
-import { DB } from '../db';
-
-interface Context {
-  db: DB
-  pubsub: PubSubEngine
-  prisma: PrismaClient
-}
+import { Context } from '../context';
 
 const user: Resolvers = {
   Query: {
