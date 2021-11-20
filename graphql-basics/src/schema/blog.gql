@@ -86,12 +86,16 @@ type Post {
     title: String!
     body: String!
     published: Boolean!
-    authorId: Int
+    author: User!
+    authorId: Int!
+    comments: [Comment]!
 }
 
 type Comment {
-    id: ID
+    id: Int!
     body: String!
     author: User!
+    authorId: Int!
     post: Post!
+    postId: Int!
 }

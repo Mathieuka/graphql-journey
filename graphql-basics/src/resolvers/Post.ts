@@ -1,4 +1,6 @@
-import { Post, Resolvers } from '../schema';
+import {
+  Post, Resolvers, User, Comment,
+} from '../schema';
 import { DB } from '../db';
 import { Context } from '../context';
 
@@ -28,7 +30,10 @@ const post: Resolvers = {
   Query: {
     posts: async (parent, args, { prisma }: Context) => {
       const posts = await prisma.post.findMany();
-      return posts;
+      if (!posts) {
+        throw new Error('Posts not found');
+      }
+      return posts as Post[];
     },
   },
   Mutation: {
@@ -46,6 +51,7 @@ const post: Resolvers = {
       if (!authorTemp) {
         throw new Error('User not found');
       }
+
       const newPost = await prisma.post.create({
         data: {
           authorId: author,
@@ -55,7 +61,11 @@ const post: Resolvers = {
         },
       });
 
-      return newPost;
+      if (!newPost) {
+        throw new Error('Post not created');
+      }
+
+      return newPost as Post;
     },
     deletePost: async (parent, { id }, { db, pubsub }, info) => {
       const postToBeDeleted = (db as DB).posts.find(({ id: postId }) => postId === id);
@@ -77,15 +87,28 @@ const post: Resolvers = {
     },
   },
   Post: {
-    // author: (parent, args, { db }) => {
-    //   const result = db.users.find(({ id }: UserDataType) => id === (<unknown>parent as PostDataType).author);
-    //   return result as User;
-    // },
-    // comments: (parent, args, { db }) => {
-    //   const result = (db.comments as CommentsDataType[])
-    //     .filter((comment) => (<unknown>parent as PostDataType).comments.includes(comment.id));
-    //   return result as unknown as Comment[];
-    // },
+    author: async (parent, args, { prisma }: Context) => {
+      const author = await prisma.user.findUnique({
+        where: {
+          id: parent.authorId,
+        },
+      });
+      if (!author) {
+        throw new Error('Author not found for this post');
+      }
+      return author as User;
+    },
+    comments: async (parent, args, { prisma }:Context) => {
+      const comments = await prisma.comment.findMany({
+        where: {
+          postId: parent.id,
+        },
+      });
+      if (!comments) {
+        throw new Error('No comments found');
+      }
+      return comments as Comment[];
+    },
   },
 };
 
