@@ -1,30 +1,7 @@
 import {
   Post, Resolvers, User, Comment,
 } from '../schema';
-import { DB } from '../db';
 import { Context } from '../context';
-
-const removePostOfTheUser = (id: string, db: DB) => new Promise((resolve) => {
-  db.users.forEach(({ posts }) => {
-    posts.filter((post) => post !== id);
-  });
-  setTimeout(() => resolve(console.log('[Post of the User removed]')), 1000);
-});
-
-const removePost = (id: string, db: DB) => new Promise((resolve) => {
-  // eslint-disable-next-line no-param-reassign
-  db.posts = [...db.posts.filter((post) => post.id !== id)];
-  db.users.forEach(({ posts }) => {
-    posts.filter((post) => post !== id);
-  });
-  setTimeout(() => resolve(console.log('[Post removed]')), 1000);
-});
-
-const removeComment = (id: string, db: DB) => new Promise((resolve) => {
-  // eslint-disable-next-line no-param-reassign
-  db.comments = [...db.comments.filter(({ post }) => post !== id)];
-  setTimeout(() => resolve(console.log('[Comment of the Post removed]')), 1000);
-});
 
 const post: Resolvers = {
   Query: {
@@ -67,23 +44,39 @@ const post: Resolvers = {
 
       return newPost as Post;
     },
-    deletePost: async (parent, { id }, { db, pubsub }, info) => {
-      const postToBeDeleted = (db as DB).posts.find(({ id: postId }) => postId === id);
-      if (!postToBeDeleted) {
-        throw new Error('Post not founded');
-      }
-      await removePostOfTheUser(id, db);
-      await removeComment(id, db);
-      await removePost(id, db);
-
-      await pubsub.publish('POST', {
-        post: {
-          mutation: 'DELETED',
-          data: postToBeDeleted as unknown as Post,
+    deletePost: async (parent, { id }, { pubsub, prisma }: Context, info) => {
+      const postToBeDeleted = await prisma.post.findUnique({
+        where: {
+          id,
         },
       });
 
-      return postToBeDeleted as unknown as Post;
+      if (!postToBeDeleted) {
+        throw new Error('Post not Found');
+      }
+
+      const commentIdsOfThePost = await prisma.comment.findMany({
+        where: {
+          postId: id,
+        },
+        select: {
+          id: true,
+        },
+      });
+
+      await prisma.comment.deleteMany({
+        where: {
+          OR: [...commentIdsOfThePost],
+        },
+      });
+
+      const postDeleted = await prisma.post.delete({
+        where: {
+          id,
+        },
+      });
+
+      return postDeleted as Post;
     },
   },
   Post: {
