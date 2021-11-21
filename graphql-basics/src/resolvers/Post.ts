@@ -44,7 +44,7 @@ const post: Resolvers = {
 
       return newPost as Post;
     },
-    deletePost: async (parent, { id }, { pubsub, prisma }: Context, info) => {
+    deletePost: async (parent, { id }, { prisma }: Context, info) => {
       const postToBeDeleted = await prisma.post.findUnique({
         where: {
           id,

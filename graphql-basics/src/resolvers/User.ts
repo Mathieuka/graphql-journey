@@ -1,7 +1,7 @@
 import {
   Comment, Post, Resolvers, User,
 } from '../schema';
-import { Context } from '../context';
+import { Context, pubsub } from '../context';
 
 const user: Resolvers = {
   Query: {
@@ -25,7 +25,7 @@ const user: Resolvers = {
     },
   },
   Mutation: {
-    createUser: async (parent, { user: { email, age, name } }, { pubsub, prisma }: Context, info) => {
+    createUser: async (parent, { user: { email, age, name } }, { prisma }: Context, info) => {
       const emailTaken = await prisma.user.findFirst({
         where: {
           email,
@@ -35,7 +35,7 @@ const user: Resolvers = {
         throw new Error('Email taken.');
       }
 
-      const createdUser = await prisma.user.create({
+      const newUser = await prisma.user.create({
         data: {
           email,
           name,
@@ -43,16 +43,16 @@ const user: Resolvers = {
           organization: `${name}-org`,
         },
       });
-      if (!createdUser) {
+      if (!newUser) {
         throw new Error('User not created');
       }
-      //   await pubsub.publish('USER_CREATED', {
-      //     userCreated: {
-      //       mutation: 'CREATED',
-      //       data: newUser,
-      //     },
-      //   });
-      return createdUser as User;
+      await pubsub.publish('USER_CREATED', {
+        userCreated: {
+          mutation: 'CREATED',
+          data: newUser,
+        },
+      });
+      return newUser as User;
     },
     updateUser: async (parent, { id, args }, { prisma }: Context, info) => {
       const emailTaken = await prisma.user.findFirst({

@@ -1,7 +1,7 @@
 import {
   Comment, Post, Resolvers, User,
 } from '../schema';
-import { Context } from '../context';
+import { Context, pubsub } from '../context';
 
 const comment: Resolvers = {
   Query: {
@@ -11,7 +11,7 @@ const comment: Resolvers = {
     },
   },
   Mutation: {
-    createComment: async (parent, { comment: { body, post, author } }, { pubsub, prisma }: Context, info) => {
+    createComment: async (parent, { comment: { body, post, author } }, { prisma }: Context, info) => {
       const authorOfTheComment = await prisma.user.findUnique({
         where: {
           id: author,
@@ -27,7 +27,6 @@ const comment: Resolvers = {
           body,
         },
       });
-
       pubsub.publish(`comment ${post}`, {
         comment: {
           mutation: 'CREATED',
