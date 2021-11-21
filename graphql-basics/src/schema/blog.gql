@@ -24,8 +24,8 @@ type Mutation {
 
 input CreateCommentInput {
     body: String!
-    author: String!
-    post: String!
+    author: Int!
+    post: Int!
 }
 
 input UpdateUserInput {
