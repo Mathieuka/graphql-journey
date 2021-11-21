@@ -1,7 +1,7 @@
 type Subscription {
     userCreated(organization: String!): UserSubscriptionPayload!
     count: Int!
-    comment(postId: String!): CommentSubscriptionPayload!
+    comment(postId: Int!): CommentSubscriptionPayload!
     post: PostSubscriptionPayload!
 }
 

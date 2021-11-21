@@ -1,12 +1,12 @@
 import { withFilter } from 'graphql-subscriptions';
 import { Resolvers } from '../schema';
-import { DB } from '../db';
+import { Context } from '../context';
 
 const subscription: Resolvers = {
   Subscription: {
     userCreated: {
       subscribe: withFilter(
-        (parent, args, { pubsub }, info) => pubsub.asyncIterator(['USER_CREATED']),
+        (parent, args, { pubsub }: Context, info) => pubsub.asyncIterator(['USER_CREATED']),
         (payload, variables) => (payload.userCreated.data.organization === variables.organization),
       ),
     },
@@ -25,8 +25,15 @@ const subscription: Resolvers = {
       },
     },
     comment: {
-      subscribe: (parent, { postId }, { pubsub, db }, info) => {
-        const post = (db as DB).posts.find(({ id, published }) => postId === id && published);
+      subscribe: async (parent, { postId }, { pubsub, prisma }: Context, info) => {
+        const post = await prisma.post.findMany({
+          where: {
+            id: postId,
+            published: {
+              equals: true,
+            },
+          },
+        });
 
         if (!post) {
           throw new Error('Post not founded');

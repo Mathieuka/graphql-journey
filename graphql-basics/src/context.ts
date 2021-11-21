@@ -5,7 +5,7 @@ import { prisma } from '../prisma/client';
 
 export interface Context {
   db: DB
-  pubsub: unknown
+  pubsub: PubSub
   prisma: PrismaClient
 }
 
