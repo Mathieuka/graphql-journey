@@ -7,7 +7,10 @@ import { Context } from '../context';
 
 const comment: Resolvers = {
   Query: {
-    comments: (parent, args, { db }) => db.comments,
+    comments: async (parent, args, { db, prisma }: Context) => {
+      const comments = prisma.comment.findMany();
+      return comments as unknown as Comment[];
+    },
   },
   Mutation: {
     createComment: async (parent, { comment: { body, post, author } }, { db, pubsub, prisma }: Context, info) => {
@@ -42,9 +45,16 @@ const comment: Resolvers = {
     ,
   },
   Comment: {
-    author: (parent, args, { db }) => {
-      const result = db.users.find(({ id }: UserDataType) => id === (<unknown>parent as CommentsDataType).author);
-      return result as User;
+    author: async (parent, args, { db, prisma }: Context) => {
+      const authorOfTheComment = await prisma.user.findUnique({
+        where: {
+          id: parent.authorId,
+        },
+      });
+      if (!authorOfTheComment) {
+        throw new Error('Author not found for this post');
+      }
+      return authorOfTheComment as User;
     },
     post: (parent, args, { db }) => {
       const result = db.posts.find(({ comments }: PostDataType) => comments.includes((<unknown>parent as CommentsDataType).id));
