@@ -56,9 +56,16 @@ const comment: Resolvers = {
       }
       return authorOfTheComment as User;
     },
-    post: (parent, args, { db }) => {
-      const result = db.posts.find(({ comments }: PostDataType) => comments.includes((<unknown>parent as CommentsDataType).id));
-      return result as Post;
+    post: async (parent, args, { db, prisma }: Context) => {
+      const post = await prisma.post.findUnique({
+        where: {
+          id: parent.postId,
+        },
+      });
+      if (!post) {
+        throw new Error('No comments found');
+      }
+      return post as Post;
     },
   },
 };
