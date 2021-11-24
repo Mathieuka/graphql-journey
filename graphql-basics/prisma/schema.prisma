@@ -14,7 +14,7 @@ model User {
     id              Int          @id @default(autoincrement())
     organization    String
     name            String
-    email           String
+    email           String       @unique
     age             Int?
     posts           Post[]
     comments        Comment[]

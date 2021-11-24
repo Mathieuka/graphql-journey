@@ -26,15 +26,6 @@ const user: Resolvers = {
   },
   Mutation: {
     createUser: async (parent, { user: { email, age, name } }, { prisma }: Context, info) => {
-      const emailTaken = await prisma.user.findFirst({
-        where: {
-          email,
-        },
-      });
-      if (emailTaken) {
-        throw new Error('Email taken.');
-      }
-
       const newUser = await prisma.user.create({
         data: {
           email,
