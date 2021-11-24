@@ -1,7 +1,7 @@
 import {
   Post, Resolvers, User, Comment,
 } from '../schema';
-import { Context } from '../context';
+import { Context, pubsub } from '../context';
 
 const post: Resolvers = {
   Query: {
@@ -41,6 +41,13 @@ const post: Resolvers = {
       if (!newPost) {
         throw new Error('Post not created');
       }
+
+      await pubsub.publish('POST', {
+        post: {
+          mutation: 'CREATED',
+          data: newPost,
+        },
+      });
 
       return newPost as Post;
     },

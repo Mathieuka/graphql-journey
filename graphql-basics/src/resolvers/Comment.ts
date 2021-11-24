@@ -27,7 +27,8 @@ const comment: Resolvers = {
           body,
         },
       });
-      pubsub.publish(`comment ${post}`, {
+
+      await pubsub.publish(`comment ${post}`, {
         comment: {
           mutation: 'CREATED',
           data: newComment,

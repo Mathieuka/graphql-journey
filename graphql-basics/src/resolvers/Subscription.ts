@@ -14,9 +14,9 @@ const subscription: Resolvers = {
       subscribe: (parent, args, info) => {
         let count = 0;
 
-        setInterval(() => {
+        setInterval(async () => {
           count += 1;
-          pubsub.publish('count', {
+          await pubsub.publish('count', {
             count,
           });
         }, 2000);
@@ -26,19 +26,22 @@ const subscription: Resolvers = {
     },
     comment: {
       subscribe: async (parent, { postId }, { prisma }: Context, info) => {
-        const post = await prisma.post.findMany({
-          where: {
-            id: postId,
-          },
-        });
-        if (!post) {
-          throw new Error('Post not founded');
+        if (prisma) {
+          const post = await prisma.post.findMany({
+            where: {
+              id: postId,
+            },
+          });
+
+          if (!post) {
+            throw new Error('Post not founded');
+          }
         }
         return pubsub.asyncIterator(`comment ${postId}`);
       },
     },
     post: {
-      subscribe: (parent, args, info) => pubsub.asyncIterator(['POST']),
+      subscribe: (parent, args, info) => pubsub.asyncIterator('POST'),
     },
   },
 };
