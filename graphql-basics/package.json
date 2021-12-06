@@ -9,7 +9,8 @@
     "graphql-codegen:server": "graphql-codegen --config codegen.yml",
     "db:prisma:generate": "npx prisma generate",
     "db:migrate:dev": "npx prisma migrate dev",
-    "db:seed": "ts-node src/seeds"
+    "db:seed": "ts-node src/seeds",
+    "db:prisma:studio": "npx prisma studio"
   },
   "keywords": [],
   "author": "",
