@@ -8,6 +8,6 @@ services:
       POSTGRES_USER: prisma
       POSTGRES_PASSWORD: prisma
     volumes:
-      - /Users/mathieu/Documents/perso/graphql-course/graphql-basics/postgres:/var/lib/postgresql/data
+      - /Users/mk/Work/graphql-journey/graphql-basics/postgres:/var/lib/postgresql/pgdata
     ports:
       - 5433:5432
